@@ -25,11 +25,13 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
 
-	ch, err := conn.Channel()
+	key := fmt.Sprintf("%s.*", routing.GameLogSlug)
+	ch, q, err := pubsub.DeclareAndBind(conn, routing.ExchangePerilTopic, routing.GameLogSlug, key, pubsub.DurableQueue)
 	if err != nil {
-		fmt.Println("Failed to create RabbitMQ channel:", err)
+		fmt.Println("Couldn't connect to peril_exchange", err)
 		return
 	}
+	fmt.Print(q)
 	defer ch.Close()
 
 	for {
