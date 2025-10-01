@@ -48,23 +48,21 @@ func handlerWar(gs *gamelogic.GameState) func(rw gamelogic.RecognitionOfWar) pub
 	return func(rw gamelogic.RecognitionOfWar) pubsub.AckType {
 		defer fmt.Print("> ")
 		outcome, winner, loser := gs.HandleWar(rw)
-		if winner != "" {
-			fmt.Println("Winner:", winner)
-		}
-		if loser != "" {
-			fmt.Println("Loser:", loser)
-		}
+		var log_message string
 
 		switch outcome {
 		case gamelogic.WarOutcomeDraw:
+			log_message = fmt.Sprintf("A war between %s and %s resulted in a draw", winner, loser)
 			return pubsub.Ack
 		case gamelogic.WarOutcomeNoUnits:
 			return pubsub.NackDiscard
 		case gamelogic.WarOutcomeNotInvolved:
 			return pubsub.NackRequeue
 		case gamelogic.WarOutcomeOpponentWon:
+			log_message = fmt.Sprint("%s won a war against %s", winner, loser)
 			return pubsub.Ack
 		case gamelogic.WarOutcomeYouWon:
+			log_message = fmt.Sprint("%s won a war against %s", winner, loser)
 			return pubsub.Ack
 		default:
 			(fmt.Printf("unexpected gamelogic.WarOutcome: %#v", outcome))
